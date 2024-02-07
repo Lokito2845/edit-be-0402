@@ -102,6 +102,6 @@ app.get("/products/:title", (req, res) => {
   if (product) {
     res.json(product);
   } else {
-    res.status(404).send("Produto não encontrado");
+    res.status(404).send("product not found");
   }
 });
