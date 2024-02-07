@@ -4,6 +4,7 @@ const Joi = require("joi");
 const services = require("./services");
 
 router.get("/posts", (req, res) => {
+  req.query.author;
   // TODO get posts
   res.status(200).json(posts);
 });

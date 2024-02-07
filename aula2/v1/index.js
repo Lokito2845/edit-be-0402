@@ -1,46 +1,107 @@
-const Joi = require("joi");
-const pino = require("pino-http");
 const express = require("express");
 const app = express();
+const Joi = require("joi");
 
 app.use(express.json());
-app.use(pino());
+// definir numero da porta
+const port = 3000;
+// inciar servidor
+app.listen(3000, () => {
+  console.log("server is running (express)");
+});
 
-const posts = [
+const server = express();
+
+server.post("/teste", (req, res) => {
+  console.log("teste is running");
+});
+
+//create a backend API
+let products = [
   {
     id: 1,
-    title: "express tutotial",
-    content: "lorem ipsum",
-    date: new Date("2020-04-23"),
-    tags: ["tag1", "tag2"],
+    title: "produto 1",
+    price: 10.99,
+  },
+  {
+    id: 2,
+    title: "produto 2",
+    price: 11.0,
+  },
+  {
+    id: 3,
+    title: "produto 3",
+    price: 12.0,
   },
 ];
 
-app.get("/posts", (req, res) => {
-  res.status(200).json(posts);
-});
-
 // post schema
-const postSchema = Joi.object({
-  title: Joi.string().min(5).required(),
-  content: Joi.string().min(10).required(),
-  date: Joi.date(),
-  tags: Joi.array().items(Joi.string()),
+const schema = Joi.object({
+  title: Joi.string().required(),
+  price: Joi.number().required(),
 });
 
-app.post("/posts", (req, res) => {
-  const { error, value } = postSchema.validate(req.body);
+//create rota , get e post
+app.get("/products", (req, res) => {
+  res.json(products);
+});
+
+app.post("/products", (req, res) => {
+  const { error, value } = schema.validate(req.body);
   if (error) {
     return res.status(400).json(error.details);
   }
 
-  // add to database
-  posts.push(value);
+  const { title, price } = req.body;
+  const id = products.length + 1;
+  const newProduct = {
+    id,
+    title,
+    price,
+  };
 
-  // response
-  res.status(201).json(posts[posts.length - 1]);
+  products.push(newProduct);
+  res.status(201).json(newProduct);
 });
 
-app.listen(3000, () => {
-  console.log("server is running (express)");
+//read
+function getProducts(title) {
+  return products.find((title) => products.title === title);
+}
+
+//obeter pruduto por id
+app.put("/products/:id", (req, res) => {
+  const id = req.params.id;
+  const updatedItem = req.body;
+
+  if (id >= 0 && id < products.length) {
+    products[id] = updatedItem;
+    res.json(updatedItem);
+  } else {
+    res.status(404).json({ error: " product not found" });
+  }
+});
+
+//delete products
+app.delete("/products/:id", (req, res) => {
+  const id = req.params.id;
+
+  if (id >= 0 && id < products.length) {
+    const deletedItem = products.splice(id, 1)[0];
+    res.json(deletedItem);
+  } else {
+    res.status(404).json({ error: "User not found" });
+  }
+});
+
+//red v2: filter by title
+app.get("/products/:title", (req, res) => {
+  const title = req.params.title;
+  const product = products.find((product) => product.title === title);
+
+  if (product) {
+    res.json(product);
+  } else {
+    res.status(404).send("Produto não encontrado");
+  }
 });

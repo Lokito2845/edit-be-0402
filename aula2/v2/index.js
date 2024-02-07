@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(pino());
 
 app.use(posts);
-
-app.listen(3000, () => {
+const port = process.env.MY_PORT;
+app.listen(port, () => {
   console.log("server is running (express)");
 });
